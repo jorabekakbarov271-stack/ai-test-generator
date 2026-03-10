@@ -1,16 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import google.generativeai as genai
+from google import genai
 import os
 
-# ===== GEMINI API KEY (Render Environment dan olinadi) =====
-genai.configure(api_key=os.getenv("AIzaSyAY2XcohwWpS-wfQNCWUAJcoY8vm-QAssQ"))
+# ===== GEMINI CLIENT =====
+client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY")
+)
 
-# ===== MODEL =====
-model = genai.GenerativeModel("gemini-pro")
-
-# ===== FASTAPI =====
+# ===== FASTAPI APP =====
 app = FastAPI()
 
 # ===== CORS =====
@@ -22,10 +21,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ===== HOME ROUTE =====
+# ===== HOME PAGE =====
 @app.get("/")
 def home():
-    return {"message": "AI Test Generator ishlayapti 🚀"}
+    return {
+        "message": "AI Test Generator ishlayapti 🚀"
+    }
 
 # ===== REQUEST MODEL =====
 class Question(BaseModel):
@@ -35,30 +36,31 @@ class Question(BaseModel):
 @app.post("/generate")
 async def generate_test(data: Question):
 
-    try:
-        prompt = f"""
+    prompt = f"""
 Quyidagi savoldan 4 variantli test tuz.
 
-Format:
-Savol: ...
+Savol: {data.question}
+
 A) ...
 B) ...
 C) ...
 D) ...
 
 Oxirida to'g'ri javobni yoz.
-
-Savol: {data.question}
 """
 
-        response = model.generate_content(prompt)
+    try:
 
-        if not response.text:
-            return {"error": "AI javob qaytarmadi"}
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt
+        )
 
         return {
             "test": response.text.replace("\n", "<br>")
         }
 
     except Exception as e:
-        return {"error": str(e)}
+        return {
+            "error": str(e)
+        }
