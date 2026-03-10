@@ -2,12 +2,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import google.generativeai as genai
+import os
 
 # ===== GEMINI API KEY =====
+# Agar local ishlatsang shu yerga qo'y
 genai.configure(api_key="AIzaSyAY2XcohwWpS-wfQNCWUAJcoY8vm-QAssQ")
 
 # ===== MODEL =====
-model = genai.GenerativeModel("gemini-pro")
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 # ===== FASTAPI APP =====
 app = FastAPI()
@@ -21,7 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ===== DATA MODEL =====
+# ===== REQUEST MODEL =====
 class Question(BaseModel):
     question: str
 
@@ -56,6 +58,4 @@ Savol: {data.question}
         }
 
     except Exception as e:
-        return {
-            "error": str(e)
-        }
+        return {"error": str(e)}
