@@ -4,17 +4,16 @@ from pydantic import BaseModel
 import google.generativeai as genai
 import os
 
-# ===== GEMINI API KEY =====
-# Agar local ishlatsang shu yerga qo'y
-genai.configure(api_key="AIzaSyAY2XcohwWpS-wfQNCWUAJcoY8vm-QAssQ")
+# ===== GEMINI API KEY (Render Environment dan olinadi) =====
+genai.configure(api_key=os.getenv("AIzaSyAY2XcohwWpS-wfQNCWUAJcoY8vm-QAssQ"))
 
 # ===== MODEL =====
 model = genai.GenerativeModel("gemini-1.5-flash")
 
-# ===== FASTAPI APP =====
+# ===== FASTAPI =====
 app = FastAPI()
 
-# ===== CORS (frontend ishlashi uchun) =====
+# ===== CORS =====
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -23,10 +22,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ===== HOME ROUTE =====
+@app.get("/")
+def home():
+    return {"message": "AI Test Generator ishlayapti 🚀"}
+
 # ===== REQUEST MODEL =====
 class Question(BaseModel):
     question: str
-
 
 # ===== TEST GENERATOR =====
 @app.post("/generate")
