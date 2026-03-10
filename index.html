@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<title>AI Test Generator</title>
+
+<style>
+
+body{
+font-family: Arial;
+background:#f4f4f4;
+text-align:center;
+padding:40px;
+}
+
+.container{
+background:white;
+padding:30px;
+border-radius:10px;
+width:600px;
+margin:auto;
+box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+
+h1{
+color:#333;
+}
+
+textarea{
+width:100%;
+height:80px;
+font-size:16px;
+padding:10px;
+}
+
+button{
+padding:12px 25px;
+font-size:16px;
+margin:10px;
+cursor:pointer;
+border:none;
+border-radius:6px;
+}
+
+#mic{
+background:#ff4d4d;
+color:white;
+}
+
+#generate{
+background:#28a745;
+color:white;
+}
+
+.test{
+margin-top:30px;
+text-align:left;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🎓 AI Test Generator</h1>
+
+<p>Savolni gapiring yoki yozing</p>
+
+<textarea id="question" placeholder="Savol yozing yoki mikrofon orqali ayting..."></textarea>
+
+<br>
+
+<button id="mic">🎤 Ovoz orqali savol</button>
+
+<button id="generate">AI Test yaratish</button>
+
+<div class="test" id="result"></div>
+
+</div>
+
+<script>
+
+const micBtn = document.getElementById("mic");
+const questionBox = document.getElementById("question");
+
+const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)();
+
+recognition.lang="uz-UZ";
+
+micBtn.onclick = () => {
+recognition.start();
+}
+
+recognition.onresult = (event) => {
+
+const text = event.results[0][0].transcript;
+
+questionBox.value = text;
+
+}
+
+document.getElementById("generate").onclick = async () => {
+
+let question = questionBox.value;
+
+let response = await fetch("http://localhost:8000/generate",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+question:question
+})
+});
+
+let data = await response.json();
+
+document.getElementById("result").innerHTML = data.test;
+
+}
+
+</script>
+
+</body>
+</html>
